@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--
+Copyright (C) 2022 Linzhi Ltd.
+
+This work is licensed under the terms of the MIT License.
+A copy of the license can be found in the file COPYING.txt
+-->
+
+<head>
+<title>Linzhi Operations DaEmon</title>
+
+<link rel="stylesheet" href="ui/style.css">
+</head>
+
+<body>
+<div id="header">
+  <div id="title">Linzhi Operations DaEmon</div>
+  <div id="right">
+    <table id="refresh-table">
+      <tr>
+	<td>
+	  <input id="auto-refresh" type="checkbox"
+	    onchange="auto_refresh(this)">
+	  <label for="auto-refresh">Auto-refresh</label>
+	</td>
+      </tr>
+      <tr>
+	<td>Last refresh: <b><span id="last-refresh">?</span></b></td>
+      </tr>
+    </table>
+    <table id="menu">
+      <tr><td id="menu-active">Active</td></tr>
+      <tr><td id="menu-test">Test</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr id="hr-top">
+
+<div id="content">
+  <div id="miners-view">
+    <div id="miners"></div>
+  </div>
+  <div id="slider"></div>
+  <div id="miner-view">
+    <table id="miner-summary">
+      <tr>
+	<td><b><span id="miner-state">?</span></b></td>
+	<td>Name: <b><span id="miner-name">?</span></b></td>
+	<td>IP: <b><span id="miner-ip">?</span></b></td>
+	<td>ID: <b><span id="miner-id">?</span></b></td>
+	<td>Serial: <b><span id="miner-serial">?</span></b></td>
+	<td>Last seen: <b><span id="miner-last-seen">?</span></b></td>
+      </tr>
+    </table>
+    <div id="active">
+      <div>
+ 	<span id="path-active"
+	    onclick="show_rules(file_path['active'])">?</span>
+	<button type="button" id="reload-button"
+	    onclick="active_reload()">Reload</button>
+      </div>
+      <table id="miner"></table>
+      <p></p>
+      <button type="button" id="update-button" onclick="start_update(false)"
+	  disabled>Update</button>
+      <button type="button" id="update-restart-button"
+	  onclick="start_update(true)" disabled><span
+	  id="update-restart-text">Restart</span></button>
+      <select id="update-scope">
+        <option value="miner">this miner</option>
+        <option value="group">this group</option>
+        <option value="all">all miners</option>
+      </select>
+    </div>
+    <div id="test">
+      <div>
+ 	<span id="path-test" onclick="show_rules(file_path['test'])">?</span>
+	<button type="button" id="test-button"
+	    onclick="test_run()">Run</button>
+      </div>
+      <table id="result"></table>
+      <p></p>
+      Note: test output is <b>only</b> updated when running the test script,
+      but not when selecting a different miner or when the miner's
+      configuration changes. Auto-refresh has no effect here.
+    </div>
+  </div>
+</div>
+
+<div id="viewer">
+  <div id="viewer-content">
+    <textarea id="viewer-text" readonly></textarea>
+    <p>
+    <div id="viewer-descr" style="display: none">
+      <span id="viewer-descr-text"></span>
+      <p>
+    </div>
+    <span id="viewer-close">Close</span>
+  </div>
+</div>
+
+<script src="ui/main.js"></script>
+
+</body>
+</html>

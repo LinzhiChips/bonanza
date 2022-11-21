@@ -1,0 +1,23 @@
+H=localhost
+curl -s $H:8003/miners
+
+curl -s $H:8003/miner?id=0x750020
+
+curl -s $H:8003/path?type=test
+curl -s $H:8003/path?type=active
+
+curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+    -d id=0x750020 $H:8003/run
+
+curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+    -d id=0x750020 $H:8003/update
+curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+    -d all $H:8003/update
+curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+    -d group=d41d8cd98f00b204e9800998ecf8427e $H:8003/update
+
+Add &restart after the selector for update & restart, e.g.,
+curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "all&restart" $H:8003/update
+
+curl -s -X POST $H:8003/reload

@@ -1,0 +1,431 @@
+/*
+ * Copyright (C) 2022 Linzhi Ltd.
+ *
+ * This work is licensed under the terms of the MIT License.
+ * A copy of the license can be found in the file COPYING.txt
+ */
+
+body {
+	/*
+	 * https://www.schemecolor.com/light-dark-green-gradient.php
+	 * Light Green
+	 */
+	background-color:	black;
+	color:			white;
+	font-family:		Arial, sans-serif;
+	font-size:		18px;
+	height:			100vh;
+}
+
+table {
+	font-size:		18px;
+}
+
+#header {
+	width:			100%;
+	white-space:		nowrap;
+}
+
+#title {
+	display:		inline-block;
+	font-size:		45px;
+	font-weight:		bold;
+	padding-left:		0px;
+	width:			1px;
+	white-space:		nowrap;
+}
+
+#right {
+	float:			right;
+}
+
+#refresh-table {
+	display:		inline-block;
+}
+
+#hr-top {
+	border:			solid 1px;
+	border-color:		white;
+	margin-bottom:		0px;
+}
+
+/* --- Top menu ------------------------------------------------------------ */
+
+#menu {
+	display:		inline-block;
+	float:			right;
+	border:			solid white 2px;
+	border-spacing:		0px;
+	margin-left:		10px;
+}
+
+#menu tr:first-child {
+	border-top-width:	2px;
+}
+
+#menu tr:last-child {
+	border-bottom-width:	2px;
+}
+
+#menu tr {
+}
+
+#menu td {
+	padding:		2px 8px 2px 8px;
+	font-weight:		bold;
+	white-space:		nowrap;
+	text-align:		center;
+	cursor:			pointer;
+}
+
+#menu td.active {
+	background-color:	white;
+	color:			black;
+}
+
+#menu tr:hover {
+	background-color:	gray;
+}
+
+/* --- Slider -------------------------------------------------------------- */
+
+/* https://stackoverflow.com/a/55189834/8179289 */
+
+#content {
+	display:		flex;
+	width:			100%;
+	height:			100%;
+}
+
+#miners-view {
+	flex-shrink:		0;
+	flex-basis:		fit-content;
+	margin-top:		8px;
+	max-width:		70%;
+}
+
+#miner-view {
+	display:		none;
+	flex-grow:		0;
+	flex-shrink:		1;
+	overflow-x:		auto;
+	width:			100%;
+}
+
+#slider {
+	display:		none;
+	flex-grow:		0;
+	flex-shrink:		0;
+	background-color:	white;
+	width:			2px;
+	cursor:			col-resize;
+	margin:			0 0px 0 6px;
+}
+
+/* --- List of miners ------------------------------------------------------ */
+
+#miners {
+}
+
+#miners span, #miners a {
+	display:		inline-block;
+	background-color:	transparent;
+	font-weight:		bold;
+	margin:			2px 4px 2px 4px;
+	margin:			0px;
+	padding:		4px 6px 4px 6px;
+	text-decoration:	none;
+	color:			black;
+}
+
+#miners>div {
+	color:			black;
+	margin-bottom:		3px;
+}
+
+#miners div span {
+	cursor:			pointer;
+}
+
+#miners div.incomplete {
+}
+
+#miners div.error div {
+	/*
+	 * @@@ not currently used, due to formatting problem described below
+	 *
+	 * @@@ Should fix the display to behave as follows:
+	 * - don't wrap text if panning, but still
+	 * - allow panning to the left, below message width, and
+	 * - display entire message if there is enough space
+	 */
+}
+
+
+/* --- Miner details ------------------------------------------------------- */
+
+#miner-summary {
+	border-spacing:		0px;
+}
+
+#miner-summary td {
+	border:			solid white 1px;
+	padding:		2px 8px 2px 8px;
+	white-space:		nowrap;
+	text-align:		right;
+}
+
+#miner-summary a {
+	color:			white;
+}
+
+#miner-summary td:first-child {
+	border-left:		none;
+}
+
+#miner-summary tr:first-child td {
+	border-top-width:	0px;
+}
+
+#miner-summary td:last-child {
+	border-right-width:	2px;
+	width:			100%;
+}
+
+#miner-summary tr:last-child td {
+	border-bottom-width:	2px;
+}
+
+/* --- Miner configuration ------------------------------------------------- */
+
+#miner {
+	border-spacing:		0px;
+	margin-left:		6px;
+	margin-top:		8px;
+}
+
+#miner td
+{
+	padding-left:		8px;
+	padding-right:		8px;
+}
+
+#miner-view {
+	display:		none;
+}
+
+#miner tr, #result tr {
+	background-color:	black;
+	color:			white;
+}
+
+#miner tr:nth-child(even), #result tr:nth-child(even) {
+	background-color:	#202020;
+}
+
+#miner tr.error td {
+	/* https://stackoverflow.com/a/31387415 */
+	border-bottom:		10px solid black;
+}
+
+#update-button, #update-restart-button, #reload-button, #test-button {
+	font-size:		18px;
+	font-weight:		bold;
+	padding:		4px 8px 4px 8px;
+	background-color:	white;
+	color:			black;
+	border:			none;
+	cursor:			pointer;
+}
+
+#reload-button:not(_), #test-button:not(_) {
+	font-size:		20px;
+	padding:		2px 8px 1px 8px;
+	margin-left:		2em;
+}
+
+#update-button:disabled, #update-restart-button:disabled,
+    #reload-button:disabled, #test-button:disabled {
+	color:			#b0b0b0;	/* light grey */
+}
+
+#update-scope {
+	font-size:		18px;
+	font-weight:		bold;
+	background-color:	black;
+	color:			white;
+	border:			none;
+	margin-left:		1em;
+}
+
+/* --- State coloring ------------------------------------------------------ */
+
+#miners div.incomplete {
+	background-color:	#b0b0b0;	/* light grey */
+	color:			black;
+}
+
+#miners div.config {
+	background-color:	#e0e0e0;	/* lighter grey */
+	color:			black;
+}
+
+#miners div.error, #miner tr.error td, #result tr.error td {
+	background-color:	#f0f000;	/* yellow */
+	color:			black;
+}
+
+#miners div.idle, #miners div.add, #miner tr.add, #result tr.add {
+	background-color:	#30ff50;	/* green */
+	color:			black;
+}
+
+#miner tr.add:nth-child(even), #result tr.add:nth-child(even) {
+	background-color:	#70ffa0;	/* light green */
+}
+
+#miners div.shutdown {
+	background-color:	#707070;	/* dark grey */
+	color:			black;
+}
+
+#miners div.del, #miner tr.del, #result tr.del {
+	background-color:	#ff80a0;	/* red */
+	color:			black;
+}
+
+#miner tr.del:nth-child(even), #result tr.del:nth-child(even) {
+	background-color:	#ffb0d0;	/* light red */
+}
+
+#miners div.change {
+	background:		linear-gradient(110deg,
+				    #ff9090 0 45%, #e0e000, #30ff50 55% 100%);
+					/* red to green */
+	color:			black;
+}
+
+#miners div.same, #miners div.restart {
+	background-color:	black;
+	border:			solid 1px white;
+}
+
+#miners div.updating {
+	background-color:	blue;
+}
+
+#miners div.same span, #miners div.updating span {
+	color:			white;
+	border:			0px;
+}
+
+#miners div.restart span {
+	color:			yellow;
+	border:			0px;
+}
+
+/* --- Active -------------------------------------------------------------- */
+
+#active {
+	display:		none;
+}
+
+#active.active {
+	display:		block;
+}
+
+/* --- Test ---------------------------------------------------------------- */
+
+#test {
+	display:		none;
+}
+
+#test.active {
+	display:		block;
+}
+
+#path-test, #path-active {
+	margin-top:		4px;
+	padding:		4px 6px 4px 6px;
+	font-weight:		bold;
+	font-size:		24px;
+	color:			#8080ff; /* light blue */
+	cursor:			pointer;
+}
+
+#result {
+	border-spacing:		0px;
+	margin-left:		6px;
+	margin-top:		8px;
+}
+
+#result td {
+	padding-left:		8px;
+	padding-right:		8px;
+}
+
+
+/* --- Explanations -------------------------------------------------------- */
+
+div.explain {
+	font-size:		12px;
+	font-weight:		bold;
+	font-style:		oblique;
+	margin-left:		3px;
+	margin-right:		3px;
+	padding-bottom:		2px;
+}
+
+div.same div.explain, div.restart div.explain {
+	color:			white;
+}
+
+/* --- Viewer -------------------------------------------------------------- */
+
+/* Based on https://www.w3schools.com/howto/howto_css_modals.asp */
+
+#viewer {
+	display:		none;
+	position:		fixed;
+	z-index:		1;
+	left:			0;
+	top:			0;
+	width:			100%;
+	height:			100%;
+	overflow:		auto;
+	background-color:	rgba(0, 0, 0, .75);
+}
+
+#viewer-content {
+	background-color:	gray;
+	margin:			10vh auto;
+	padding:		10px;
+	border:			none;
+	width:			80%;
+}
+
+#viewer-text {
+	background-color:	white;
+	color:			black;
+	border:			none;
+	height:			70vh;
+	width:			100%;
+}
+
+#viewer-descr-text {
+	font-weight:		normal; /* defaults to bold. why ? */
+}
+
+#viewer-close {
+	font-weight:		bold;
+	font-size:		18px;
+	background-color:	white;
+	color:			black;
+	border:			none;
+	padding:		2px 8px 2px 8px;
+}
+
+#viewer-close:hover, #viewer-close:focus {
+	cursor:			pointer;
+	background-color:	#e0e0e0;	/* lighter grey */
+}
