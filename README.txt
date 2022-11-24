@@ -86,12 +86,6 @@ Known bugs
 - The interaction of miner selection (left) and the variables (right) can be
   confusing in Test mode.
 
-- When the destination the mining daemon currently uses is removed, the daemon
-  will continue using the destination until a new destination is selected by
-  the user, the connection fails, or the daemon restarts. Either mined or lode
-  should perform the destination change automatically, to avoid having a stale
-  configuration and possibly confusing miner behaviour.
-
 
 User interface
 ==============
@@ -180,10 +174,10 @@ followed by an alphabetically sorted list of configuration variables. Variables
 that are to be deleted or changed are shown in red. Variables that are to be
 added or changed are shown in green.
 
-In Active mode, a "Update" and an "Update & restart" button are shown. Clicking
-on either sends the configuration change to the miner. If using "Update &
-restart", if the changes require any daemon restart or miner reboot, it is
-automatically performed after making the configuration change.
+In Active mode, an "Update" and an "Update & restart" button are shown.
+Clicking on either sends the configuration change to the miner. If using
+"Update & restart", if the changes require any daemon restart or miner reboot,
+it is automatically performed after making the configuration change.
 
 If a miner configuration has changed but still requires a restart, the "Update
 & restart" button changes to "Restart". Clicking it will command the restart.
@@ -208,6 +202,34 @@ condition:
 	var = value
 	...
 ...
+
+
+Example:
+
+BANNER = "hello"
+ip == 10.1.2.13:
+	BANNER = "thirteen"
+
+This sets the banner message of all miners to "hello", except for the miner at
+address 10.1.2.13, which has the banner set to "thirteen".
+
+
+Comments and long lines
+-----------------------
+
+Comments begin with a hash sign (#) and extend to the end of the line. Empty
+lines are ignored. Line breaks can be inserted anywhere and any number of times
+in Long lines.
+
+Example:
+
+#
+# This is a comment
+#
+
+BANNER = "hello"	# and so is this
+BANNER = "something" +	# this works,
+    " else"		# too
 
 
 Variables
