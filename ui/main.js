@@ -235,7 +235,7 @@ function identifier(miner)
 	var ipv4 = miner["ipv4"];
 	var id = miner["id"];
 
-	if (name != null) {
+	if (name != null && name != "") {
 		span.textContent = name;
 	} else if (ipv4 != null) {
 		span.textContent = ipv4;
@@ -253,7 +253,7 @@ function label(miner)
 	var ipv4 = miner["ipv4"];
 	var id = miner["id"];
 
-	if (name != null) {
+	if (name != null && name != "") {
 		return name;
 	}
 	if (ipv4 != null) {
