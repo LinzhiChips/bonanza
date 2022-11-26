@@ -31,7 +31,7 @@ int asprintf_req(char **s, const char *fmt, ...)
 	res = vasprintf(s, fmt, ap);
 	va_end(ap);
 	if (res < 0) {
-		perror("asprintf");                     \
+		perror("asprintf");
 		exit(1);
 	}
 	return res;

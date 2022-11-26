@@ -55,7 +55,7 @@ void var_set_keys(struct var *vars, const char *base, const char *keys)
 	size_t base_len = strlen(base);
 	const char *p;
 
-	p = keys; 
+	p = keys;
 	while (1) {
 		struct var **v;
 		const char *end;

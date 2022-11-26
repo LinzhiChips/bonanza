@@ -326,7 +326,7 @@ There are the following values and expressions:
 
 - Quoted strings: either with " or '.
 
-  Examples: "this is a string" 
+  Examples: "this is a string"
 	    'and so is this'
 
 - String concatenation: strings are concatenated with the plus (+) operator.
@@ -548,7 +548,7 @@ DARK_TIMEOUT
 	Default: 0
 DHCP	Use DHCP for network configuration.
 	Values:
-	y	Use DHCP to configure IP, GW, ...	
+	y	Use DHCP to configure IP, GW, ...
 	n	Use configured "static" values.
 	Default: n
 DHCP_NAME

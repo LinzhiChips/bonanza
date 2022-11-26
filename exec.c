@@ -256,7 +256,7 @@ struct rule *rules_file(const char *name)
 	}
 
 	rule_anchor = &rules;
-        scan_rules(file, name);
+	scan_rules(file, name);
 	if (yyparse()) {
 		fclose(file);
 		free_rules(rules);

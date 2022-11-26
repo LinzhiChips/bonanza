@@ -47,7 +47,7 @@ static bool match(const regex_t *preg, const char *s)
 }
 
 
-unsigned validate(const struct validate *val, const char *name, 
+unsigned validate(const struct validate *val, const char *name,
     const char *value)
 {
 	const struct validate_var *vv;

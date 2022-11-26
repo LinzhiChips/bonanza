@@ -95,7 +95,6 @@ struct json_object *change_to_json(const struct delta *d)
 		}
 	}
 	return obj;
-	
 }
 
 
@@ -151,7 +150,6 @@ struct json_object *delta_to_json(const struct delta *d)
 		d = d->next;
 	}
 	return obj;
-	
 }
 
 

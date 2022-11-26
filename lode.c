@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 	int longopt = 0;
 	int c;
 
-        const struct option longopts[] = {
+	const struct option longopts[] = {
 		{ "dump",	0,	&longopt,	'd' },
 		{ "group",	1,	&longopt,	'g' },
 		{ "magic",	1,	&longopt,	'm' },
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 		{ "verbose",	0,	&longopt,	'v' },
 		{ "yydebug",	0,	&longopt,	'Y' },
 		{ NULL,		0,	NULL,		0 }
-        };
+	};
 
 	while ((c = getopt_long(argc, argv, "dg:M:p:r:uvY", longopts,
 	    NULL)) != EOF)
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 		case 'p':
 			crew_port = strtoul(optarg, &end, 0);
 			if (*end)
-       				usage(*argv);
+				usage(*argv);
 			break;
 		case 'r':
 			auto_restart = 1;

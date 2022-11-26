@@ -94,7 +94,7 @@ char *miners_json(void)
 {
 	const struct miner *m;
 	char *s = stralloc("[ ");
-		
+
 	for (m = miners; m; m = m->next) {
 		char *name = string_or_null(m->name);
 		char *ipv4 = quad_or_null(m->ipv4);
@@ -318,7 +318,7 @@ static char *run_result(char *error, struct delta *delta)
 	char *s;
 
 	obj = json_object_new_object();
-        if (!obj) {
+	if (!obj) {
 		perror("json_object_new_object");
 		exit(1);
 	}

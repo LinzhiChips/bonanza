@@ -60,7 +60,7 @@ static void mqtt_fd(void *user, int fd, short revents)
 			fprintf(stderr, IPv4_QUAD_FMT
 			    ": warning: mosquitto_loop_write: %s (%d)\n",
 			    IPv4_QUAD(m->ipv4), mosquitto_strerror(res), res);
-        }
+	}
 }
 
 
@@ -108,12 +108,12 @@ void mqtt_vprintf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
 void mqtt_printf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
     bool retain, const char *fmt, ...)
 {
-        va_list ap;
+	va_list ap;
 
-        assert(!strchr(topic, '%'));
-        va_start(ap, fmt);
-        mqtt_vprintf(mosq, topic, qos, retain, fmt, ap);
-        va_end(ap);
+	assert(!strchr(topic, '%'));
+	va_start(ap, fmt);
+	mqtt_vprintf(mosq, topic, qos, retain, fmt, ap);
+	va_end(ap);
 }
 
 
@@ -294,7 +294,6 @@ void mqtt_idle(void)
 			*anchor = m->next;
 			miner_destroy(m);
 			continue;
-			
 		}
 		if (m->mosq) {
 			mqtt_miner_idle(m);

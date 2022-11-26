@@ -32,7 +32,7 @@ enum mqtt_qos {
 
 void mqtt_vprintf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
     bool retain, const char *fmt, va_list ap);
-void mqtt_printf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos, 
+void mqtt_printf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
     bool retain, const char *fmt, ...)
     __attribute__((format(printf, 5, 6)));
 

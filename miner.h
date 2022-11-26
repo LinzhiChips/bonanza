@@ -76,7 +76,7 @@ extern struct miner *miners;
 bool miner_can_calculate(const struct miner *m);
 bool miner_calculate(struct miner_env *env, struct miner *m,
     const char *dir, const struct rule *rules);
-void miner_calculation_finish(struct miner_env *env, char **error, 
+void miner_calculation_finish(struct miner_env *env, char **error,
     struct delta **delta);
 
 const char *consider_updating(struct miner *m, bool request, bool restart);

@@ -11,12 +11,12 @@ favicon.ico:	Makefile
 		# \342\234\224 is U+2714
 		# https://en.wikipedia.org/wiki/Dingbat
 		convert -size 320x320 -fill '#88a6e0' \
-                    -gravity center \
-                    -font WenQuanYi-Micro-Hei \
-                    label:"`echo '\345\207\244'`" \
-                    -background None \
-                    -fill '#008000' \
-                    -font Dingbats \
-                    label:"`echo '\342\234\224'`" \
-                    -layers flatten \
-                    -trim -scale '32x32!' "$@"
+		    -gravity center \
+		    -font WenQuanYi-Micro-Hei \
+		    label:"`echo '\345\207\244'`" \
+		    -background None \
+		    -fill '#008000' \
+		    -font Dingbats \
+		    label:"`echo '\342\234\224'`" \
+		    -layers flatten \
+		    -trim -scale '32x32!' "$@"

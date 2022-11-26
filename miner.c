@@ -201,12 +201,12 @@ bool miner_calculate(struct miner_env *env, struct miner *m,
 
 	if (verbose > 1 || (env->flags & mf_dump)) {
 		printf("----- Configuration variables -----\n");
-                dump_vars(env->exec.cfg_vars);
+		dump_vars(env->exec.cfg_vars);
 		printf("-----\n");
 	}
 	if (verbose > 2 || (env->flags & mf_dump)) {
 		printf("----- Variables -----\n");
-                dump_vars(env->exec.script_vars);
+		dump_vars(env->exec.script_vars);
 		printf("-----\n");
 	}
 

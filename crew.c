@@ -44,10 +44,10 @@ struct status_1 {
 };
 
 struct status_2 {
-	uint32_t	uptime;         /* system uptime, in seconds */
-	uint32_t	sys_time;       /* system "real" time */
-	uint32_t	fw_date;        /* firmware build date */
-	uint32_t	ipv4;           /* IPv4 address */
+	uint32_t	uptime;		/* system uptime, in seconds */
+	uint32_t	sys_time;	/* system "real" time */
+	uint32_t	fw_date;	/* firmware build date */
+	uint32_t	ipv4;		/* IPv4 address */
 };
 
 #define SERIAL_LEN      8
@@ -57,7 +57,7 @@ struct status_5 {
 	char		serial_1[SERIAL_LEN];	/* zero-padded */
 };
 
-/* 24 bytes */ 
+/* 24 bytes */
 
 struct msg_header {
 	uint64_t	hash;   /* SHA3(PBKDF2(secret) + rest_of_msg) */

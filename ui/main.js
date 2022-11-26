@@ -31,7 +31,7 @@ function remove_all_children(e)
 
 function pad2(n)
 {
-        return n < 10 ? "0" + n : n;
+	return n < 10 ? "0" + n : n;
 }
 
 
@@ -346,7 +346,6 @@ function show_miners(data)
 				error_cluster[error] = [];
 			}
 			error_cluster[error].push(id);
-			
 		} else if (delta != null) {
 			if (state == "updating") {
 				updating_cluster.push(id);
@@ -573,7 +572,7 @@ class Viewer {
 		this.ta = document.getElementById("viewer-text");
 		this.button = document.getElementById("viewer-close");
 		this.descr = document.getElementById("viewer-descr");
-                this.descr_text = document.getElementById("viewer-descr-text");
+		this.descr_text = document.getElementById("viewer-descr-text");
 
 		this.button.addEventListener("click",
 		    function() { self.close(); });
@@ -676,7 +675,7 @@ function slider_end(event) {
 
 
 function slider_mouse_down(event) {
-	moving_slider = true; 
+	moving_slider = true;
 	document.body.addEventListener("mousemove", slider_mouse_move)
 	document.body.addEventListener("mouseup", slider_end)
 }
@@ -684,7 +683,7 @@ function slider_mouse_down(event) {
 
 function slider_mouse_move(event) {
 	var e = document.getElementById("miners-view");
-		
+
 	if (moving_slider) {
 		e.style.flexBasis = event.clientX + "px";
 	} else {
@@ -795,7 +794,6 @@ function poll_update()
 	get_json(miners_url).then(data => {
 		var updated = show_miners(data);
 
-		
 		if (selected_id != null && !(selected_id in miner_cache)) {
 			deselect_miner();
 		}
@@ -942,7 +940,7 @@ function select_mode(name)
 	for (let name of [ "active", "test" ]) {
 		var td = document.getElementById("menu-" + name);
 
-        	td.addEventListener("click", function() { select_mode(name); });
+		td.addEventListener("click", function() { select_mode(name); });
 		activate_mode(name, 0);
 	}
 
