@@ -1,5 +1,5 @@
 /*
- * lode.h - Common items for Linzhi Operations DaEmon
+ * bonanza.h - Common items for the Linzhi operations daemon
  *
  * Copyright (C) 2022 Linzhi Ltd.
  *
@@ -7,8 +7,8 @@
  * A copy of the license can be found in the file COPYING.txt
  */
 
-#ifndef LODE_H
-#define	LODE_H
+#ifndef BONANZA_H
+#define	BONANZA_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -39,4 +39,4 @@ void scan_rules(FILE *file, const char *name);
 void scan_hosts(FILE *file, const char *name);
 void scan_map(FILE *file, const char *name);
 
-#endif /* !LODE_H */
+#endif /* !BONANZA_H */

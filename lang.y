@@ -19,7 +19,7 @@
 #include "exec.h"
 #include "host.h"
 #include "map.h"
-#include "lode.h"
+#include "bonanza.h"
 %}
 
 %union {

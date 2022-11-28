@@ -19,7 +19,7 @@
 
 #include <mosquitto.h>
 
-#include "lode.h"
+#include "bonanza.h"
 #include "alloc.h"
 #include "fds.h"
 #include "miner.h"

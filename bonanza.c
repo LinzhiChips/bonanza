@@ -1,5 +1,5 @@
 /*
- * lode.c - Linzhi Operations DaEmon
+ * bonanza.c - Linzhi operations daemon
  *
  * Copyright (C) 2022 Linzhi Ltd.
  *
@@ -30,7 +30,7 @@
 
 #include "y.tab.h"
 
-#include "lode.h"
+#include "bonanza.h"
 
 
 struct rule *active_rules = NULL;

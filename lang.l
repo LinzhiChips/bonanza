@@ -19,7 +19,7 @@
 #include "error.h"
 #include "expr.h"
 #include "exec.h"
-#include "lode.h"
+#include "bonanza.h"
 
 #include "y.tab.h"
 

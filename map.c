@@ -17,7 +17,7 @@
 
 #include "alloc.h"
 #include "error.h"
-#include "lode.h"
+#include "bonanza.h"
 #include "expr.h" /* for y.tab.h */
 #include "map.h"
 

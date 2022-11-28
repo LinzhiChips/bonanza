@@ -16,7 +16,7 @@
 #include <arpa/inet.h>
 
 #include "alloc.h"
-#include "lode.h"
+#include "bonanza.h"
 #include "fds.h"
 #include "mqtt.h"
 #include "miner.h"

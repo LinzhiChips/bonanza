@@ -15,7 +15,7 @@
 
 #include <json-c/json.h>
 
-#include "lode.h"
+#include "bonanza.h"
 #include "alloc.h"
 #include "error.h"
 #include "fds.h"

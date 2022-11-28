@@ -14,7 +14,7 @@
 #include <stdio.h>
 
 #include "alloc.h"
-#include "lode.h"
+#include "bonanza.h"
 #include "error.h"
 
 

@@ -1,5 +1,5 @@
-lode - Linzhi Operations DaEmon
-===============================
+bonanza - Linzhi operations daemon
+==================================
 
 Copyright (C) 2021, 2022 Linzhi Ltd.
 
@@ -10,8 +10,8 @@ A copy of the license can be found in the file COPYING.txt
 Introduction
 ------------
 
-Lode listens to messages from the crew and obtains some miner attributes like
-its ID number, IP address, name, etc. from it. Once it knows a miner's IP
+Bonanza listens to messages from the crew and obtains some miner attributes
+like its ID number, IP address, name, etc. from it. Once it knows a miner's IP
 address, it opens an MQTT connection to each miner and retrieves its
 configuration.
 
@@ -35,16 +35,16 @@ Prerequisites:
 - libmd-dev
 - fonts-wqy-microhei (for font WenQuanYi-Micro-Hei, used for the favicon)
 
-To build lode, simply
+To build bonanza, simply
 
-  git clone https://github.com/LinzhiChips/lode.git
+  git clone https://github.com/LinzhiChips/bonanza.git
 
 and run
 
   make
 
-When running, lode expects to find files in the following subdirectories of the
-current directory:
+When running, bonanza expects to find files in the following subdirectories of
+the current directory:
 
 - ui/: HTML, Javascript, and CSS of the Web UI
 - active/: the files of the active configuration, rules.txt and any files
@@ -53,28 +53,28 @@ current directory:
   referenced by it
 
 You have to create directories or symbolic links for active/ and test/. The
-lode repository does not contain them, so that one can use symbolic links also
-if running lode directly from the working tree.
+bonanza repository does not contain them, so that one can use symbolic links
+also if running bonanza directly from the working tree.
 
 Note that, for security reasons, the use of directories in path names is
 restricted. Certain well-known directories are allowed, e.g., one can access
 ui/index.html or active/rules.txt, but things like /etc/passwd or ../secret.txt
 would not work. This affects the Web interface and path names in rules files.
 
-When starting lode, the rules file can be given as an argument. Example:
+When starting bonanza, the rules file can be given as an argument. Example:
 
-  ./lode active/rules.txt
+  ./bonanza active/rules.txt
 
-If no rules file is given, lode will run without rules, i.e., it will not
+If no rules file is given, bonanza will run without rules, i.e., it will not
 propose any configuration changes. If there is a rules file in active/, it can
 be loaded later with "Reload" on the "Active" screen.
 
-After it has started, lode sets up an HTTP server on port 8003. This HTTP
-server provides the files of the Web user interface and access to lode's JSON
-API. The port number can be changed with the option -j port.
+After it has started, bonanza sets up an HTTP server on port 8003. This HTTP
+server provides the files of the Web user interface and access to bonanza's
+JSON API. The port number can be changed with the option -j port.
 
 To access the user interface, simply direct a Web browser to
-http://machine.running.lode:8003
+http://machine.running.bonanza:8003
 
 
 Known bugs

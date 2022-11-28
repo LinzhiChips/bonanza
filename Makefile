@@ -10,17 +10,17 @@ CFLAGS = -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 SLOPPY = -Wno-unused -Wno-implicit-function-declaration
 LDFLAGS =
 LDLIBS = -lfl -lmosquitto -lmd -ljson-c
-OBJS = lode.o alloc.o lex.yy.o y.tab.o expr.o exec.o var.o host.o map.o \
+OBJS = bonanza.o alloc.o lex.yy.o y.tab.o expr.o exec.o var.o host.o map.o \
        fds.o crew.o mqtt.o miner.o http.o web.o api.o config.o hash.o \
        validate.o error.o
 
 include Makefile.c-common
 
-all::		lode
+all::		bonanza
 
-lode:		$(OBJS)
+bonanza:	$(OBJS)
 
-lode.c:		y.tab.h
+bonanza.c:	y.tab.h
 
 lex.yy.c:	lang.l y.tab.h
 		$(LEX) lang.l
@@ -39,4 +39,4 @@ clean::
 		rm -f y.tab.c y.tab.h lex.yy.c
 
 spotless::	clean
-		rm -f lode
+		rm -f bonanza

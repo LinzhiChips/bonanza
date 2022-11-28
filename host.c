@@ -16,7 +16,7 @@
 #include <errno.h>
 
 #include "alloc.h"
-#include "lode.h"
+#include "bonanza.h"
 #include "error.h"
 #include "expr.h" /* for y.tab.h */
 #include "host.h"

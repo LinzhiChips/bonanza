@@ -14,7 +14,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "lode.h"
+#include "bonanza.h"
 #include "alloc.h"
 #include "validate.h"
 #include "api.h"
