@@ -24,7 +24,6 @@
 
 
 static struct rule **rule_anchor;
-static enum magic_flags flags;
 
 
 /* ----- Execution --------------------------------------------------------- */
@@ -74,9 +73,9 @@ void set_var(const struct setting *self, struct exec_env *exec)
 		free_value(key);
 	if (magic && !strcmp(self->name, magic)) {
 		if (!strcmp(v->s, "stop"))
-			flags |= mf_stop;
+			exec->flags |= mf_stop;
 		if (!strcmp(v->s, "delta"))
-			flags |= mf_delta;
+			exec->flags |= mf_delta;
 	}
 }
 
@@ -85,15 +84,14 @@ enum magic_flags run(struct exec_env *exec, const struct rule *r)
 {
 	struct setting *s;
 
-	flags = 0;
-	while (r && !get_error() && !(flags & mf_stop)) {
+	while (r && !get_error() && !(exec->flags & mf_stop)) {
 		if (!r->cond || bool_evaluate(r->cond, exec))
 			for (s = r->settings; s; s = s->next)
 				s->op(s, exec);
 		r = r->next;
 	}
 
-	return flags;
+	return exec->flags;
 }
 
 
@@ -104,6 +102,7 @@ void exec_env_init(struct exec_env *exec, const char *dir,
 	exec->validate = validate;
 	exec->cfg_vars = NULL;
 	exec->script_vars = NULL;
+	exec->flags = 0;
 }
 
 

@@ -44,6 +44,7 @@ struct exec_env {
 	/* run-time */
 	struct var *cfg_vars;
 	struct var *script_vars;
+	enum magic_flags flags;
 };
 
 
