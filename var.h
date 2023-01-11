@@ -21,6 +21,8 @@ struct var {
 	char *name;
 	struct value *value;
 	unsigned seq;
+	bool assoc;	/* was set with name[key] = ... or comes from
+			   associative configuration variable */
 	struct var *next;
 };
 

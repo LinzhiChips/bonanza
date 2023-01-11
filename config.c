@@ -1,7 +1,7 @@
 /*
  * config.c - Configuration variables and deltas
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -55,7 +55,7 @@ bool config_set(struct config *c, const char *name, const char *value)
 	cv = alloc_type(struct cfgvar);
 	cv->name = stralloc(name);
 	cv->value = stralloc(value);
-	cv->assoc = !strcmp(name, "DEST");
+	cv->keys = !strcmp(name, "DEST");
 	cv->next = *anchor;
 	*anchor = cv;
 	return 1;
@@ -190,7 +190,7 @@ struct delta *config_delta(struct config *c, const struct var *v)
 	while (cv || v) {
 		int cmp;
 
-		while (cv && cv->assoc && strcmp(cv->name, "DEST"))
+		while (cv && cv->keys && strcmp(cv->name, "DEST"))
 			cv = cv->next;
 		if (cv && v)
 			cmp = strcmp(cv->name, v->name);

@@ -1,7 +1,7 @@
 /*
  * lang.y - Parser for rules, host, and map files
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -267,7 +267,13 @@ settings:
 setting:
 	CFGNAME '=' '{' '}'
 		{
-			$$ = new_setting(set_clear);
+			$$ = new_setting(set_clear_cfg);
+			$$->name = $1;
+			$$->key = NULL;
+		}
+	| NAME '=' '{' '}'
+		{
+			$$ = new_setting(set_clear_var);
 			$$->name = $1;
 			$$->key = NULL;
 		}

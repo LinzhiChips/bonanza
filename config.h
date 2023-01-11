@@ -1,7 +1,7 @@
 /*
  * config.h - Configuration variables and deltas
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -20,7 +20,7 @@
 struct cfgvar {
 	char *name;
 	char *value;
-	bool assoc;		/* variable contains keys of associative
+	bool keys;		/* variable contains keys of associative
 				   array */
 	struct cfgvar *next;
 };

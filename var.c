@@ -40,6 +40,8 @@ static struct var **assoc_list(struct var *vars, const char *base, unsigned *n)
 			continue;
 		if (v->name[base_len] != '_')
 			continue;
+		if (!v->assoc)
+			continue;
 		list = realloc_type_n(list, *n + 1);
 		list[*n] = v;
 		(*n)++;
@@ -67,7 +69,8 @@ void var_set_keys(struct var *vars, const char *base, const char *keys)
 		key_len = end - p;
 		for (v = list; v != list + n; v++)
 			if (!strncmp((*v)->name + base_len + 1, p, key_len) &&
-			   !(*v)->name[base_len + 1 + key_len])
+			   !(*v)->name[base_len + 1 + key_len] &&
+			   (*v)->assoc)
 				break;
 		if (v)
 			(*v)->seq = sequence++;
@@ -119,7 +122,7 @@ void var_unset_assoc(struct var **vars, const char *base)
 		struct var *v = *anchor;
 
 		if (!strncmp(v->name, base, base_len) &&
-		    v->name[base_len] == '_') {
+		    v->name[base_len] == '_' && v->assoc) {
 			*anchor = v->next;
 			free(v->name);
 			free_value(v->value);
@@ -144,9 +147,14 @@ const struct var *var_get_var(const struct var *vars, const char *name,
 		asprintf_req(&n, "%s_%s", name, key);
 		name = n;
 	}
-	for (v = vars; v; v = v->next)
+	for (v = vars; v; v = v->next) {
+		if (key && !v->assoc)
+			continue;
+		if (!key && v->assoc)
+			continue;
 		if (!strcmp(v->name, name))
 			break;
+	}
 	free(n);
 	return v;
 }
@@ -168,7 +176,7 @@ void dump_vars(const struct var *vars)
 	for (v = vars; v; v = v->next) {
 		printf("%s = ", v->name);
 		dump_value(v->value);
-		printf(" (%u)\n", v->seq);
+		printf(" (%u)%s\n", v->seq, v->assoc ? " assoc" : "");
 	}
 }
 
@@ -214,6 +222,11 @@ void var_set(struct var **vars, const char *name, const char *key,
 		v = *anchor;
 		cmp = strcmp(name, v->name);
 		if (!cmp) {
+			if ((v->assoc && !key) || (!v->assoc && key)) {
+				errorf("'%s' is used with and without key",
+				    name);
+				return;
+			}
 			free(n);
 			free_value(v->value);
 			v->value = value;
@@ -227,6 +240,7 @@ void var_set(struct var **vars, const char *name, const char *key,
 	v->name = stralloc(name);
 	v->value = value;
 	v->seq = sequence++;
+	v->assoc = key;
 	v->next = *anchor;
 	*anchor = v;
 	free(n);

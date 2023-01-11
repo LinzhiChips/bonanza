@@ -1,7 +1,7 @@
 /*
  * exec.c - Rules file execution
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -29,11 +29,19 @@ static struct rule **rule_anchor;
 /* ----- Execution --------------------------------------------------------- */
 
 
-void set_clear(const struct setting *self, struct exec_env *exec)
+void set_clear_cfg(const struct setting *self, struct exec_env *exec)
 {
 	if (verbose)
 		printf("%s = {}\n", self->name);
 	var_unset_assoc(&exec->cfg_vars, self->name);
+}
+
+
+void set_clear_var(const struct setting *self, struct exec_env *exec)
+{
+	if (verbose)
+		printf("%s = {}\n", self->name);
+	var_unset_assoc(&exec->script_vars, self->name);
 }
 
 
@@ -127,7 +135,7 @@ void dump_setting(const struct setting *s)
 		dump_expr(s->key);
 		printf("]");
 	}
-	if (op == set_clear) {
+	if (op == set_clear_cfg || op == set_clear_var) {
 		printf(" = {}");
 	} else if (op == set_cfg) {
 		printf(" /* cfg */ = ");
@@ -178,7 +186,7 @@ static void free_setting(struct setting *s)
 		free_expr(s->expr);
 		if (s->key)
 			free_expr(s->key);
-	} else if (s->op == set_clear) {
+	} else if (s->op == set_clear_cfg || s->op == set_clear_var) {
 		/* nothing to do */
 	} else {
 		abort();
