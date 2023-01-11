@@ -1,7 +1,7 @@
 /*
  * fds.c - File descriptor polling and dispatch
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -133,10 +133,10 @@ bool fd_poll(int timeout_ms)
 		perror("poll");
 		exit(1);
 	}
-	if (!got)
-		return 0;
 	if (time(&now) == (time_t) -1)
 		perror("time");
+	if (!got)
+		return 0;
 	for (i = 0; i != n_pollfds && got; i++)
 		if (pollfds[i].revents) {
 			const struct fd *f, *next;
