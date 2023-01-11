@@ -41,13 +41,6 @@ const struct sw_topic *sw_listen(const char *topic)
 {
 	struct sw_topic **anchor;
 
-	/*
-	 * @@@ This is a little ugly: we require the topic to begin with "/",
-	 * to avoid things like switch_use, which looks like switch["use"], to
-	 * be considered topics.
-	 */
-	if (*topic != '/')
-		return NULL;
 	for (anchor = &topics; *anchor; anchor = &(*anchor)->next)
 		if (!strcmp((*anchor)->topic, topic))
 			return *anchor;
@@ -82,13 +75,9 @@ struct sw_miner {
 
 void sw_miner_add(struct miner *m, const char *topic, uint32_t mask)
 {
-	const struct sw_topic *t = sw_listen(topic);
-	struct sw_miner *sw;
+	struct sw_miner *sw = alloc_type(struct sw_miner);
 
-	if (!t)
-		return;
-	sw = alloc_type(struct sw_miner);
-	sw->topic = t;
+	sw->topic = sw_listen(topic);
 	sw->mask = mask;
 	sw->next = m->sw;
 	m->sw = sw;
@@ -142,7 +131,8 @@ bool sw_miner_setup(struct miner *m, const struct var *vars)
 
 	sw_miner_reset(m);
 	for (var = vars; var; var = var->next)
-		if (!strncmp(var->name, "switch", 6) && var->name[6] == '_') {
+		if (!strncmp(var->name, "switch", 6) && var->name[6] == '_' &&
+		    var->assoc) {
 			if (!uint32_value(var, &mask))
 				return 0;
 			sw_miner_add(m, var->name + 7, mask);
