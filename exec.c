@@ -59,7 +59,7 @@ void set_cfg(const struct setting *self, struct exec_env *exec)
 void set_var(const struct setting *self, struct exec_env *exec)
 {
 	struct value *v = evaluate(self->expr, exec);
-	struct value *key = self->key ? evaluate(self->expr, exec) : NULL;
+	struct value *key = self->key ? evaluate(self->key, exec) : NULL;
 	char *s = v->s;
 
 	if (verbose) {

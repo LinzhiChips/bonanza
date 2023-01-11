@@ -36,6 +36,8 @@ void mqtt_printf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
     bool retain, const char *fmt, ...)
     __attribute__((format(printf, 5, 6)));
 
+void miner_send_sw(struct miner *m);
+
 void miner_ipv4(uint32_t id, uint32_t ipv4);
 void miner_seen(uint32_t id);
 

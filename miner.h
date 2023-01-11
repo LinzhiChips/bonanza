@@ -1,7 +1,7 @@
 /*
  * miner.h - Miner state tracking
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -51,6 +51,12 @@ struct miner {
 	struct delta		*delta;
 	char			*error;
 
+	struct sw_miner		*sw;		/* ops switch */
+	uint32_t		sw_value;
+	uint32_t		sw_mask;
+	unsigned		sw_refresh_s;	/* refresh interval */
+	time_t			sw_last_sent;
+
 	/* update rate limit */
 	time_t			cooldown;	/* don't allow next update
 						   earlier */
@@ -60,7 +66,7 @@ struct miner {
 
 struct miner_env {
 	struct exec_env exec;
-	const struct miner *miner;
+	struct miner *miner;
 	struct var *cfg_vars;	/* @@@ should not use global variable */
 	struct var *vars;	/* @@@ should not use global variable */
 	struct delta *delta;

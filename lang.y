@@ -292,7 +292,15 @@ setting:
 			$$->expr = $3;
 			$$->key = NULL;
 		}
+	| NAME '[' value_expression ']' '=' value_expression
+		{
+			$$ = new_setting(set_var);
+			$$->name = $1;
+			$$->expr = $6;
+			$$->key = $3;
+		}
 	;
+
 
 /* ----- Value ------------------------------------------------------------- */
 

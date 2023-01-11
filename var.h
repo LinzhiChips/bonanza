@@ -1,7 +1,7 @@
 /*
- * var.c - Variables
+ * var.h - Variables
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -25,6 +25,8 @@ struct var {
 };
 
 
+const struct var *var_get_var(const struct var *vars, const char *name,
+    const char *key);
 const struct value *var_get(const struct var *vars, const char *name,
     const char *key);
 

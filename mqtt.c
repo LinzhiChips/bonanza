@@ -158,6 +158,19 @@ static void subscribe_one(struct miner *m, const char *topic, int qos)
 }
 
 
+/* ----- Ops switch -------------------------------------------------------- */
+
+
+void miner_send_sw(struct miner *m)
+{
+	if (m->state == ms_shutdown || m->state == ms_connecting)
+		return;
+	mqtt_printf(m->mosq, "/power/on/ops-set", qos_ack, 1, "0x%x 0x%x",
+	    (unsigned) m->sw_value, (unsigned) m->sw_mask);
+	m->sw_last_sent = now;
+}
+
+
 /* ----- Connect and disconnect -------------------------------------------- */
 
 
@@ -179,6 +192,7 @@ static void connected(struct mosquitto *mosq, void *data, int result)
 	assert(m->state == ms_connecting);
 	m->state = ms_syncing;
 	subscribe_one(m, "/config/+", 1);
+	miner_send_sw(m);
 	update_poll(m);
 }
 
@@ -190,7 +204,7 @@ static void disconnected(struct mosquitto *mosq, void *data, int result)
 
 	if (m->state == ms_shutdown)
 		return;
-	miner_reset(m);
+	miner_reset(m);	/* ms_connecting */
 
 	if (verbose)
 		fprintf(stderr, IPv4_QUAD_FMT
@@ -299,8 +313,11 @@ void mqtt_idle(void)
 			mqtt_miner_idle(m);
 			update_poll(m);
 		}
-		if (*anchor == m)
-			anchor = &(*anchor)->next;
+		if (*anchor != m)
+			continue;
+		anchor = &(*anchor)->next;
+		if (m->sw_refresh_s && m->sw_last_sent + m->sw_refresh_s < now)
+			miner_send_sw(m);
 	}
 }
 

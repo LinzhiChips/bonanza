@@ -1,7 +1,7 @@
 /*
  * var.c - Variables
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -134,7 +134,7 @@ void var_unset_assoc(struct var **vars, const char *base)
 /* ----- Get and  dump variables ------------------------------------------- */
 
 
-const struct value *var_get(const struct var *vars, const char *name,
+const struct var *var_get_var(const struct var *vars, const char *name,
     const char *key)
 {
 	const struct var *v;
@@ -148,6 +148,15 @@ const struct value *var_get(const struct var *vars, const char *name,
 		if (!strcmp(v->name, name))
 			break;
 	free(n);
+	return v;
+}
+
+
+const struct value *var_get(const struct var *vars, const char *name,
+    const char *key)
+{
+	const struct var *v = var_get_var(vars, name, key);
+
 	return v ? v->value : NULL;
 }
 

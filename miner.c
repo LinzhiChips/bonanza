@@ -1,7 +1,7 @@
 /*
  * miner.c - Miner state tracking
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -26,6 +26,7 @@
 #include "config.h"
 #include "validate.h"
 #include "api.h"
+#include "sw.h"
 #include "miner.h"
 
 
@@ -164,7 +165,7 @@ static void initialize_vars(struct miner_env *env)
 }
 
 
-static void finalize_vars(struct miner_env *env)
+static bool finalize_vars(struct miner_env *env)
 {
 	char *dest_keys = var_get_keys(env->exec.cfg_vars, "DEST");
 
@@ -173,6 +174,7 @@ static void finalize_vars(struct miner_env *env)
 		    string_value(dest_keys), NULL);
 		free(dest_keys);
 	}
+	return sw_miner_setup(env->miner, env->exec.script_vars);
 }
 
 
@@ -191,9 +193,9 @@ bool miner_calculate(struct miner_env *env, struct miner *m,
 	initialize_vars(env);
 	if (!get_error())
 		env->flags = run(&env->exec, rules);
-	report = report_fatal;
 
 	if (get_error()) {
+		report = report_fatal;
 		env->error = stralloc(get_error());
 		clear_error();
 		return 0;
@@ -210,7 +212,14 @@ bool miner_calculate(struct miner_env *env, struct miner *m,
 		printf("-----\n");
 	}
 
-	finalize_vars(env);
+	if (!finalize_vars(env)) {
+		report = report_fatal;
+		env->error = stralloc(get_error());
+		clear_error();
+		return 0;
+	}
+	report = report_fatal;
+
 	env->delta = config_delta(env->miner->config, env->exec.cfg_vars);
 
 	if (env->flags & mf_delta)
@@ -413,6 +422,7 @@ void miner_reset(struct miner *m)
 	}
 	free(m->error);
 	m->error = NULL;
+	sw_miner_reset(m);
 	free(m->restart);
 	m->restart = NULL;
 }
@@ -468,6 +478,8 @@ struct miner *miner_new(uint32_t id)
 
 	m->delta = NULL;
 	m->error = NULL;
+	m->sw = NULL;
+	sw_miner_reset(m);
 	m->cooldown = 0;
 
 	m->next = miners;

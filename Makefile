@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2022 Linzhi Ltd.
+# Copyright (C) 2022, 2023 Linzhi Ltd.
 #
 # This work is licensed under the terms of the MIT License.
 # A copy of the license can be found in the file COPYING.txt
@@ -12,7 +12,7 @@ LDFLAGS =
 LDLIBS = -lfl -lmosquitto -lmd -ljson-c
 OBJS = bonanza.o alloc.o lex.yy.o y.tab.o expr.o exec.o var.o host.o map.o \
        fds.o crew.o mqtt.o miner.o http.o web.o api.o config.o hash.o \
-       validate.o error.o
+       validate.o error.o sw.o
 
 include Makefile.c-common
 
