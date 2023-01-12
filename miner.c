@@ -149,12 +149,11 @@ static void initialize_vars(struct miner_env *env)
 	var_set(&env->exec.script_vars, "1/serial", NULL,
 	    string_value(m->serial[1]), NULL);
 
-	/*
-	 * We don't bother with using keys here since we need to order the
-	 * sequence numbers according to DEST anyway.
-	 */
 	for (cv = m->config->vars; cv; cv = cv->next) {
-		if (strcmp(cv->name, "DEST"))
+		if (!strncmp(cv->name, "DEST", 4) && cv->name[4] == '_')
+			var_set(&env->exec.cfg_vars, "DEST",  cv->name + 5,
+			    string_value(cv->value), env->exec.validate);
+		else if (strcmp(cv->name, "DEST"))
 			var_set(&env->exec.cfg_vars, cv->name,  NULL,
 			    string_value(cv->value), env->exec.validate);
 		else
