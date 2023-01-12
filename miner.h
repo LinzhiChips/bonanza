@@ -17,6 +17,7 @@
 #include <mosquitto.h>
 
 #include "fds.h"
+#include "mqtt.h"
 #include "validate.h"
 #include "exec.h"
 #include "config.h"
@@ -39,8 +40,7 @@ struct miner {
 
 	/* connection */
 	enum miner_state	state;
-	struct mosquitto	*mosq;
-	struct fd		*fd;
+	struct mqtt_session	mqtt;
 
 	/* miner data from MQTT */
 	struct validate		*validate;

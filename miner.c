@@ -92,8 +92,8 @@ const char *consider_updating(struct miner *m, bool request, bool restart)
 	}
 	m->cooldown = now + COOLDOWN_UPDATE_S;
 
-	mqtt_printf(m->mosq, "/config/bulk-set", qos_ack, 0, "%s", s);
-	update_poll(m);
+	mqtt_printf(m->mqtt.mosq, "/config/bulk-set", qos_ack, 0, "%s", s);
+	update_poll(&m->mqtt);
 
 	/*
 	 * the print buffer returned by json_object_to_json_string is stored in
@@ -433,10 +433,10 @@ void miner_destroy(struct miner *m)
 	free(m->name);
 	free(m->serial[0]);
 	free(m->serial[1]);
-	if (m->mosq)
-		mosquitto_destroy(m->mosq);
-	if (m->fd)
-		fd_del(m->fd);
+	if (m->mqtt.mosq)
+		mosquitto_destroy(m->mqtt.mosq);
+	if (m->mqtt.fd)
+		fd_del(m->mqtt.fd);
 	miner_reset(m);
 	config_free(m->config);
 	free(m->restart);
@@ -470,8 +470,8 @@ struct miner *miner_new(uint32_t id)
 	m->last_seen = now;
 
 	m->state = ms_connecting;
-	m->mosq = NULL;
-	m->fd = NULL;
+	m->mqtt.mosq = NULL;
+	m->mqtt.fd = NULL;
 	m->validate = NULL;
 	m->config = NULL;
 	m->restart = NULL;
