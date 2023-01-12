@@ -1,7 +1,7 @@
 /*
  * api.c - HTTP/JSON API functions
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -97,7 +97,7 @@ char *miners_json(void)
 
 	for (m = miners; m; m = m->next) {
 		char *name = string_or_null(m->name);
-		char *ipv4 = quad_or_null(m->ipv4);
+		char *ipv4 = quad_or_null(m->mqtt.ipv4);
 		char *hash = m->config ? config_hash(m->config) : NULL;
 		char *miner_hash = string_or_null(m->config ? hash : NULL);
 		char *delta_hash = NULL;

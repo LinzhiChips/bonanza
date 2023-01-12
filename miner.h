@@ -33,7 +33,6 @@ enum miner_state {
 struct miner {
 	/* miner data from crew */
 	uint32_t		id;
-	uint32_t		ipv4;
 	char			*name;		/* NULL if not yet seen */
 	char			*serial[2];	/* NULL if not yet seen */
 	time_t			last_seen;

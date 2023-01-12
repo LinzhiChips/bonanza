@@ -34,12 +34,13 @@ enum mqtt_qos {
 struct mqtt_session {
 	struct mosquitto *mosq;
 	struct fd *fd;
+	uint32_t ipv4;
 };
 
 
-void mqtt_vprintf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
+void mqtt_vprintf(struct mqtt_session *mq, const char *topic, enum mqtt_qos qos,
     bool retain, const char *fmt, va_list ap);
-void mqtt_printf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
+void mqtt_printf(struct mqtt_session *mq, const char *topic, enum mqtt_qos qos,
     bool retain, const char *fmt, ...)
     __attribute__((format(printf, 5, 6)));
 

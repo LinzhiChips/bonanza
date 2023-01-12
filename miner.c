@@ -92,7 +92,7 @@ const char *consider_updating(struct miner *m, bool request, bool restart)
 	}
 	m->cooldown = now + COOLDOWN_UPDATE_S;
 
-	mqtt_printf(m->mqtt.mosq, "/config/bulk-set", qos_ack, 0, "%s", s);
+	mqtt_printf(&m->mqtt, "/config/bulk-set", qos_ack, 0, "%s", s);
 	update_poll(&m->mqtt);
 
 	/*
@@ -110,7 +110,7 @@ const char *consider_updating(struct miner *m, bool request, bool restart)
 
 bool miner_can_calculate(const struct miner *m)
 {
-	if (!m->ipv4)
+	if (!m->mqtt.ipv4)
 		return 0;
 	if (!m->name || !m->serial[0] || !m->serial[1])
 		return 0;
@@ -138,9 +138,9 @@ static void initialize_vars(struct miner_env *env)
 	var_set(&env->exec.script_vars, "id", NULL, numeric_value(buf, m->id),
 	    NULL);
 
-	sprintf(buf, IPv4_QUAD_FMT, IPv4_QUAD(m->ipv4));
+	sprintf(buf, IPv4_QUAD_FMT, IPv4_QUAD(m->mqtt.ipv4));
 	var_set(&env->exec.script_vars, "ip", NULL,
-	     numeric_value(buf, m->ipv4), NULL);
+	     numeric_value(buf, m->mqtt.ipv4), NULL);
 
 	var_set(&env->exec.script_vars, "name", NULL,
 	    string_value(m->name), NULL);
@@ -286,7 +286,7 @@ struct miner *miner_by_ipv4(uint32_t ipv4)
 	struct miner *m;
 
 	for (m = miners; m; m = m->next)
-		if (m->ipv4 == ipv4)
+		if (m->mqtt.ipv4 == ipv4)
 			return m;
 	return NULL;
 }
@@ -464,7 +464,7 @@ struct miner *miner_new(uint32_t id)
 
 	m = alloc_type(struct miner);
 	m->id = id;
-	m->ipv4 = 0;
+	m->mqtt.ipv4 = 0;
 	m->name = NULL;
 	m->serial[0] = m->serial[1] = NULL;
 	m->last_seen = now;

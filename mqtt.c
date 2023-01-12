@@ -44,45 +44,44 @@ void update_poll(const struct mqtt_session *mq)
 
 static void mqtt_fd(void *user, int fd, short revents)
 {
-	struct miner *m = user;
+	struct mqtt_session *mq = user;
 	int res;
 
 	if (revents & POLLIN) {
-		res = mosquitto_loop_read(m->mqtt.mosq, 1);
+		res = mosquitto_loop_read(mq->mosq, 1);
 		if (res != MOSQ_ERR_SUCCESS && verbose)
 			fprintf(stderr, IPv4_QUAD_FMT
 			    ": warning: mosquitto_loop_read: %s (%d)\n",
-			    IPv4_QUAD(m->ipv4), mosquitto_strerror(res), res);
+			    IPv4_QUAD(mq->ipv4), mosquitto_strerror(res), res);
 	}
 	if (revents & POLLOUT) {
-		res = mosquitto_loop_write(m->mqtt.mosq, 1);
+		res = mosquitto_loop_write(mq->mosq, 1);
 		if (res != MOSQ_ERR_SUCCESS && verbose)
 			fprintf(stderr, IPv4_QUAD_FMT
 			    ": warning: mosquitto_loop_write: %s (%d)\n",
-			    IPv4_QUAD(m->ipv4), mosquitto_strerror(res), res);
+			    IPv4_QUAD(mq->ipv4), mosquitto_strerror(res), res);
 	}
 }
 
 
-static void mqtt_miner_idle(struct miner *m)
+static void mqtt_session_idle(struct mqtt_session *mq)
 {
 	int res;
 
-	res = mosquitto_loop_misc(m->mqtt.mosq);
+	res = mosquitto_loop_misc(mq->mosq);
 	if (res != MOSQ_ERR_SUCCESS && verbose)
 		fprintf(stderr,
 		    IPv4_QUAD_FMT ": warning: mosquitto_loop_misc: %s (%d)\n",
-		    IPv4_QUAD(m->ipv4), mosquitto_strerror(res), res);
+		    IPv4_QUAD(mq->ipv4), mosquitto_strerror(res), res);
 }
 
 
 /* ----- Publishing -------------------------------------------------------- */
 
 
-void mqtt_vprintf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
+void mqtt_vprintf(struct mqtt_session *mq, const char *topic, enum mqtt_qos qos,
     bool retain, const char *fmt, va_list ap)
 {
-	const struct miner *m = mosquitto_userdata(mosq);
 	char *s;
 	int res;
 
@@ -93,26 +92,26 @@ void mqtt_vprintf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
 	if (verbose)
 		fprintf(stderr,
 		    IPv4_QUAD_FMT ": MQTT \"%s\" -> \"%s\"\n",
-		    IPv4_QUAD(m->ipv4), topic, s);
-	res = mosquitto_publish(mosq, NULL, topic, strlen(s), s, qos,
+		    IPv4_QUAD(mq->ipv4), topic, s);
+	res = mosquitto_publish(mq->mosq, NULL, topic, strlen(s), s, qos,
 	    retain);
 	if (res != MOSQ_ERR_SUCCESS)
 		fprintf(stderr,
 		    IPv4_QUAD_FMT
 		    ": warning: mosquitto_publish (%s): %s (%d)\n",
-		    IPv4_QUAD(m->ipv4), topic, mosquitto_strerror(res), res);
+		    IPv4_QUAD(mq->ipv4), topic, mosquitto_strerror(res), res);
 	free(s);
 }
 
 
-void mqtt_printf(struct mosquitto *mosq, const char *topic, enum mqtt_qos qos,
+void mqtt_printf(struct mqtt_session *mq, const char *topic, enum mqtt_qos qos,
     bool retain, const char *fmt, ...)
 {
 	va_list ap;
 
 	assert(!strchr(topic, '%'));
 	va_start(ap, fmt);
-	mqtt_vprintf(mosq, topic, qos, retain, fmt, ap);
+	mqtt_vprintf(mq, topic, qos, retain, fmt, ap);
 	va_end(ap);
 }
 
@@ -130,7 +129,7 @@ static void message(struct mosquitto *mosq, void *user,
 		return;
 	if (verbose > 1)
 		fprintf(stderr, IPv4_QUAD_FMT ": MQTT \"%s\": \"%.*s\"\n",
-		    IPv4_QUAD(m->ipv4), msg->topic, msg->payloadlen,
+		    IPv4_QUAD(m->mqtt.ipv4), msg->topic, msg->payloadlen,
 		    (const char *) msg->payload);
 
 	buf = alloc_size(msg->payloadlen + 1);
@@ -143,18 +142,18 @@ static void message(struct mosquitto *mosq, void *user,
 }
 
 
-static void subscribe_one(struct miner *m, const char *topic, int qos)
+static void subscribe_one(struct mqtt_session *mq, const char *topic, int qos)
 {
 	int res;
 
-	res = mosquitto_subscribe(m->mqtt.mosq, NULL, topic, qos);
+	res = mosquitto_subscribe(mq->mosq, NULL, topic, qos);
 	if (res != MOSQ_ERR_SUCCESS) {
 		fprintf(stderr,
 		    IPv4_QUAD_FMT ": mosquitto_subscribe %s: %s (%d)\n",
-		    IPv4_QUAD(m->ipv4), topic, mosquitto_strerror(res), res);
+		    IPv4_QUAD(mq->ipv4), topic, mosquitto_strerror(res), res);
 		exit(1);
 	}
-	update_poll(&m->mqtt);
+	update_poll(mq);
 }
 
 
@@ -165,7 +164,7 @@ void miner_send_sw(struct miner *m)
 {
 	if (m->state == ms_shutdown || m->state == ms_connecting)
 		return;
-	mqtt_printf(m->mqtt.mosq, "/power/on/ops-set", qos_ack, 1, "0x%x 0x%x",
+	mqtt_printf(&m->mqtt, "/power/on/ops-set", qos_ack, 1, "0x%x 0x%x",
 	    (unsigned) m->sw_value, (unsigned) m->sw_mask);
 	m->sw_last_sent = now;
 }
@@ -183,15 +182,16 @@ static void connected(struct mosquitto *mosq, void *data, int result)
 	if (result) {
 		fprintf(stderr,
 		    IPv4_QUAD_FMT ": MQTT connect failed: %s (%d)\n",
-		    IPv4_QUAD(m->ipv4), mosquitto_strerror(result), result);
+		    IPv4_QUAD(m->mqtt.ipv4), mosquitto_strerror(result),
+		    result);
 		exit(1);
 	}
 	if (verbose)
 		fprintf(stderr, IPv4_QUAD_FMT ": MQTT connected\n",
-		    IPv4_QUAD(m->ipv4));
+		    IPv4_QUAD(m->mqtt.ipv4));
 	assert(m->state == ms_connecting);
 	m->state = ms_syncing;
-	subscribe_one(m, "/config/+", 1);
+	subscribe_one(&m->mqtt, "/config/+", 1);
 	miner_send_sw(m);
 	update_poll(&m->mqtt);
 }
@@ -209,7 +209,8 @@ static void disconnected(struct mosquitto *mosq, void *data, int result)
 	if (verbose)
 		fprintf(stderr, IPv4_QUAD_FMT
 		    ": warning: reconnecting MQTT (disconnect reason %s, %d)\n",
-		    IPv4_QUAD(m->ipv4), mosquitto_strerror(result), result);
+		    IPv4_QUAD(m->mqtt.ipv4), mosquitto_strerror(result),
+		    result);
 	if (result == MOSQ_ERR_KEEPALIVE) {
 		/*
 		 * There is a failure pattern that begins with a disconnect due
@@ -228,7 +229,7 @@ static void disconnected(struct mosquitto *mosq, void *data, int result)
 	if (res != MOSQ_ERR_SUCCESS) {
 		fprintf(stderr,
 		    IPv4_QUAD_FMT ": mosquitto_reconnect: %s (%d)\n",
-		    IPv4_QUAD(m->ipv4), mosquitto_strerror(res), res);
+		    IPv4_QUAD(m->mqtt.ipv4), mosquitto_strerror(res), res);
 		m->state = ms_shutdown;
 		return;
 	}
@@ -251,10 +252,10 @@ void miner_ipv4(uint32_t id, uint32_t ipv4)
 		fprintf(stderr, "miner 0x%x not found\n", id);
 		return;
 	}
-	if (m->ipv4)
+	if (m->mqtt.ipv4)
 		return;
 
-	m->ipv4 = ipv4;
+	m->mqtt.ipv4 = ipv4;
 	mosq = mosquitto_new(NULL, 1, m);
 	if (!mosq) {
 		fprintf(stderr, "mosquitto_new failed\n");
@@ -266,19 +267,19 @@ void miner_ipv4(uint32_t id, uint32_t ipv4)
 	mosquitto_message_callback_set(mosq, message);
 //	mosquitto_publish_callback_set(mosq, published);
 
-	sprintf(buf, IPv4_QUAD_FMT, IPv4_QUAD(m->ipv4));
+	sprintf(buf, IPv4_QUAD_FMT, IPv4_QUAD(m->mqtt.ipv4));
 	res = mosquitto_connect(mosq, buf, MQTT_DEFAULT_PORT,
 	    MQTT_KEEPALIVE_S);
 	if (res != MOSQ_ERR_SUCCESS) {
 		fprintf(stderr, IPv4_QUAD_FMT ": mosquitto_connect: %s (%d)\n",
-		    IPv4_QUAD(m->ipv4), mosquitto_strerror(res), res);
+		    IPv4_QUAD(m->mqtt.ipv4), mosquitto_strerror(res), res);
 		mosquitto_destroy(mosq);
-		m->ipv4 = 0;
+		m->mqtt.ipv4 = 0;
 		return;
 	}
 	m->mqtt.mosq = mosq;
 	m->mqtt.fd =
-	    fd_add(mosquitto_socket(mosq), poll_flags(mosq), mqtt_fd, m);
+	    fd_add(mosquitto_socket(mosq), poll_flags(mosq), mqtt_fd, &m->mqtt);
 }
 
 
@@ -311,7 +312,7 @@ void mqtt_idle(void)
 			continue;
 		}
 		if (m->mqtt.mosq) {
-			mqtt_miner_idle(m);
+			mqtt_session_idle(&m->mqtt);
 			update_poll(&m->mqtt);
 		}
 		if (*anchor != m)
