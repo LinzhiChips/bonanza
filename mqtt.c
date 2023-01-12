@@ -22,8 +22,13 @@
 #include "bonanza.h"
 #include "alloc.h"
 #include "fds.h"
+#include "sw.h"
 #include "miner.h"
 #include "mqtt.h"
+
+
+static struct mqtt_session broker_mqtt;
+static bool broker_connected = 0;
 
 
 /* ----- Mosquitto loop ---------------------------------------------------- */
@@ -119,26 +124,35 @@ void mqtt_printf(struct mqtt_session *mq, const char *topic, enum mqtt_qos qos,
 /* ----- Subscriptions and reception --------------------------------------- */
 
 
-static void message(struct mosquitto *mosq, void *user,
-    const struct mosquitto_message *msg)
+static void message(struct mqtt_session *mq, void *user,
+    const struct mosquitto_message *msg,
+    void (*deliver)(void *user, const char *topic, const char *payload))
 {
-	struct miner *m = user;
 	char *buf;
 
-	if (m->state == ms_shutdown)
-		return;
 	if (verbose > 1)
 		fprintf(stderr, IPv4_QUAD_FMT ": MQTT \"%s\": \"%.*s\"\n",
-		    IPv4_QUAD(m->mqtt.ipv4), msg->topic, msg->payloadlen,
+		    IPv4_QUAD(mq->ipv4), msg->topic, msg->payloadlen,
 		    (const char *) msg->payload);
 
 	buf = alloc_size(msg->payloadlen + 1);
 	memcpy(buf, msg->payload, msg->payloadlen);
 	buf[msg->payloadlen] = 0;
 
-	miner_deliver(m, msg->topic, buf);
-	update_poll(&m->mqtt);
+	deliver(user, msg->topic, buf);
+	update_poll(mq);
 	free(buf);
+}
+
+
+static void miner_message(struct mosquitto *mosq, void *user,
+    const struct mosquitto_message *msg)
+{
+	struct miner *m = user;
+
+	if (m->state == ms_shutdown)
+		return;
+	message(&m->mqtt, user, msg, miner_deliver);
 }
 
 
@@ -173,7 +187,7 @@ void miner_send_sw(struct miner *m)
 /* ----- Connect and disconnect -------------------------------------------- */
 
 
-static void connected(struct mosquitto *mosq, void *data, int result)
+static void miner_connected(struct mosquitto *mosq, void *data, int result)
 {
 	struct miner *m = data;
 
@@ -197,7 +211,7 @@ static void connected(struct mosquitto *mosq, void *data, int result)
 }
 
 
-static void disconnected(struct mosquitto *mosq, void *data, int result)
+static void miner_disconnected(struct mosquitto *mosq, void *data, int result)
 {
 	struct miner *m = data;
 	int res;
@@ -262,9 +276,9 @@ void miner_ipv4(uint32_t id, uint32_t ipv4)
 		exit(1);
 	}
 
-	mosquitto_connect_callback_set(mosq, connected);
-	mosquitto_disconnect_callback_set(mosq, disconnected);
-	mosquitto_message_callback_set(mosq, message);
+	mosquitto_connect_callback_set(mosq, miner_connected);
+	mosquitto_disconnect_callback_set(mosq, miner_disconnected);
+	mosquitto_message_callback_set(mosq, miner_message);
 //	mosquitto_publish_callback_set(mosq, published);
 
 	sprintf(buf, IPv4_QUAD_FMT, IPv4_QUAD(m->mqtt.ipv4));
@@ -299,6 +313,146 @@ void miner_seen(uint32_t id)
 }
 
 
+/* ----- Broker message ---------------------------------------------------- */
+
+
+static void broker_deliver(void *user, const char *topic,
+    const char *payload)
+{
+	if (strcmp(payload, "0") && strcmp(payload, "1")) {
+		fprintf(stderr, "%s: value '%s' is neither 0 nor 1\n",
+		    topic, payload);
+		return;
+	}
+	sw_set(topic, !strcmp(payload, "1"));
+}
+
+
+static void broker_message(struct mosquitto *mosq, void *user,
+    const struct mosquitto_message *msg)
+{
+	if (broker_connected)
+		message(&broker_mqtt, NULL, msg, broker_deliver);
+}
+
+
+void broker_subscribe(const char *topic)
+{
+	if (broker_connected)
+		subscribe_one(&broker_mqtt, topic, qos_ack);
+}
+
+
+/* ----- Broker connect and disconnect ------------------------------------- */
+
+
+static void broker_connect(struct mosquitto *mosq, void *data, int result)
+{
+	if (result) {
+		fprintf(stderr,
+		    IPv4_QUAD_FMT ": MQTT connect failed: %s (%d)\n",
+		    IPv4_QUAD(broker_mqtt.ipv4), mosquitto_strerror(result),
+		    result);
+		exit(1);
+	}
+	if (verbose)
+		fprintf(stderr, IPv4_QUAD_FMT ": MQTT connected\n",
+		    IPv4_QUAD(broker_mqtt.ipv4));
+	broker_connected = 1;
+	sw_subscribe();
+	update_poll(&broker_mqtt);
+}
+
+
+static void broker_disconnect(struct mosquitto *mosq, void *data, int result)
+{
+	struct miner *m = data;
+	int res;
+
+	broker_connected = 0;
+	if (verbose)
+		fprintf(stderr, IPv4_QUAD_FMT
+		    ": warning: reconnecting MQTT (disconnect reason %s, %d)\n",
+		    IPv4_QUAD(broker_mqtt.ipv4), mosquitto_strerror(result),
+		    result);
+	if (result == MOSQ_ERR_KEEPALIVE) {
+		/*
+		 * There is a failure pattern that begins with a disconnect due
+		 * to acommon error, like MOSQ_ERR_CONN_LOST, the reconnect
+		 * seems to succeed, but then we get immediately disconnected
+		 * with MOSQ_ERR_KEEPALIVE, try to reconnect, etc. This repeats
+		 * forever.
+		 */
+		return;
+	}
+	res = mosquitto_reconnect(mosq);
+	if (res != MOSQ_ERR_SUCCESS) {
+		fprintf(stderr,
+		    IPv4_QUAD_FMT ": mosquitto_reconnect: %s (%d)\n",
+		    IPv4_QUAD(m->mqtt.ipv4), mosquitto_strerror(res), res);
+		/* @@@ should try later */
+		return;
+	}
+	update_poll(&broker_mqtt);
+}
+
+
+static void setup_broker(const char *broker)
+{
+	struct mosquitto *mosq;
+	char *host = NULL;
+	const char *colon;
+	char *end;
+	int port = MQTT_DEFAULT_PORT;
+	int res;
+
+	colon = strchr(broker, ':');
+	if (colon) {
+		port = strtoul(colon + 1, &end, 0);
+		if (*end) {
+			fprintf(stderr, "invalid port \"%s\"\n", colon + 1);
+			exit(1);
+		}
+	}
+	host = strndup(broker,
+	    colon ? (size_t) (colon - broker) : strlen(broker));
+	if (!host) {
+		perror("strndup");
+		exit(1);
+	}
+
+	mosq = mosquitto_new(NULL, 1, NULL);
+	if (!mosq) {
+		fprintf(stderr, "mosquitto_new failed\n");
+		exit(1);
+	}
+
+	mosquitto_connect_callback_set(mosq, broker_connect);
+	mosquitto_disconnect_callback_set(mosq, broker_disconnect);
+	mosquitto_message_callback_set(mosq, broker_message);
+
+	if (verbose)
+		fprintf(stderr, "connecting to MQTT broker (%s:%u)\n",
+		    host, port);
+	res = mosquitto_connect(mosq, host, port, 3600);
+	if (res != MOSQ_ERR_SUCCESS) {
+		fprintf(stderr, "mosquitto_connect: %s\n",
+		    mosquitto_strerror(res));
+		exit(1);
+	}
+	free(host);
+
+	broker_mqtt.mosq = mosq;
+	broker_mqtt.ipv4 = 0; /* @@@ */
+	broker_mqtt.fd =
+	    fd_add(mosquitto_socket(mosq), poll_flags(mosq), mqtt_fd,
+	    &broker_mqtt);
+}
+
+
+/* ----- Idle and initialization ------------------------------------------- */
+
+
 void mqtt_idle(void)
 {
 	struct miner **anchor = &miners;
@@ -324,7 +478,9 @@ void mqtt_idle(void)
 }
 
 
-void mqtt_init(void)
+void mqtt_init(const char *broker)
 {
 	mosquitto_lib_init();
+	if (broker)
+		setup_broker(broker);
 }

@@ -1,12 +1,13 @@
 /*
  * bonanza.c - Linzhi operations daemon
  *
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022, 2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
  */
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -42,8 +43,8 @@ bool stop = 0;
 static void usage(const char *name)
 {
 	fprintf(stderr,
-"usage: %s [-d] [-g address] [-j off|port] [-p port] [-r] [-u]\n"
-"       %*s[-v ...] [-Y] [rules__file]\n\n"
+"usage: %s [-d] [-g address] [-j off|port] [-m host:[port]] [-p port]\n"
+"       %*s[-r] [-u] [-v ...] [-Y] [rules__file]\n\n"
 "-d, --dump\n"
 "\tdon't enter daemon mode, run rules once, dump all data\n"
 "-g address, --group=address\n"
@@ -60,6 +61,10 @@ static void usage(const char *name)
 "-M var, --magic=var\n"
 "\tdry-run mode; writing to the \"magic\" variable causes special effects:\n"
 "\tskip: ignore miner; stop: exit; diff: show differences; dump: dump vars\n"
+"-m host[:port]\n"
+"\tConnect to the specified MQTT broker for the ops switch. If omitted, the\n"
+"\tport defaults to %u. By default, only connection to brokers on miners\n"
+"\tare made.\n"
 "-r, --restart\n"
 "\tautomatically restart miner if configuration update requires it\n"
 "-u, --update\n"
@@ -69,7 +74,8 @@ static void usage(const char *name)
 "-Y, --yydebug\n"
 "\tenable yydebug (for debugging of lsterm only)\n"
 	    , name, (int) strlen(name) + 1, "",
-	    DEFAULT_MC_ADDR, DEFAULT_HTTP_PORT, DEFAULT_CREW_PORT);
+	    DEFAULT_MC_ADDR, DEFAULT_HTTP_PORT, DEFAULT_CREW_PORT,
+	    MQTT_DEFAULT_PORT);
 	exit(1);
 }
 
@@ -80,6 +86,7 @@ int main(int argc, char **argv)
 	uint16_t crew_port = DEFAULT_CREW_PORT;
 	uint16_t http_port = DEFAULT_HTTP_PORT;
 	const char *crew_mc_addr = NULL;
+	const char *broker = NULL;
 	bool dump = 0;
 	char *end;
 	int longopt = 0;
@@ -97,7 +104,7 @@ int main(int argc, char **argv)
 		{ NULL,		0,	NULL,		0 }
 	};
 
-	while ((c = getopt_long(argc, argv, "dg:M:p:r:uvY", longopts,
+	while ((c = getopt_long(argc, argv, "dg:M:m:p:r:uvY", longopts,
 	    NULL)) != EOF)
 		switch (c ? c : longopt) {
 		case 'd':
@@ -117,6 +124,9 @@ int main(int argc, char **argv)
 			break;
 		case 'M':
 			magic = optarg;
+			break;
+		case 'm':
+			broker = optarg;
 			break;
 		case 'p':
 			crew_port = strtoul(optarg, &end, 0);
@@ -176,7 +186,7 @@ int main(int argc, char **argv)
 		active_rules = rules;
 	}
 
-	mqtt_init();
+	mqtt_init(broker);
 	crew_init(crew_port);
 	crew_enable_multicast(crew_mc_addr);
 	if (http_port)

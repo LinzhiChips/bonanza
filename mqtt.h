@@ -51,7 +51,9 @@ void miner_seen(uint32_t id);
 
 void update_poll(const struct mqtt_session *mq);
 
+void broker_subscribe(const char *topic);
+
 void mqtt_idle(void);
-void mqtt_init(void);
+void mqtt_init(const char *broker);
 
 #endif /* !MQTT_H */

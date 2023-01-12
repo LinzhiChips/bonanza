@@ -93,7 +93,7 @@ void miner_set_name(struct miner *m, const char *name);
 void miner_set_serial(struct miner *m,
     const char *serial0, const char *serial1);
 
-void miner_deliver(struct miner *m, const char *topic, const char *payload);
+void miner_deliver(void *user, const char *topic, const char *payload);
 
 void miner_reset(struct miner *m);
 void miner_destroy(struct miner *m);

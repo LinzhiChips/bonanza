@@ -382,8 +382,10 @@ static void process_config(struct miner *m, const char *s)
 }
 
 
-void miner_deliver(struct miner *m, const char *topic, const char *payload)
+void miner_deliver(void *user, const char *topic, const char *payload)
 {
+	struct miner *m = user;
+
 	if (!strcmp(topic, "/config/bulk")) {
 		process_config(m, payload);
 		consider_calculation(m);

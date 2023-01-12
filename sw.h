@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "var.h"
+
 
 struct miner;
 struct sw_topic;
@@ -20,6 +22,7 @@ struct exec_env;
 
 
 const struct sw_topic *sw_listen(const char *topic);
+void sw_subscribe(void);
 void sw_cleanup(void);
 
 void sw_miner_add(struct miner *m, const char *topic, uint32_t mask);
