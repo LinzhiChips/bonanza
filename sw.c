@@ -30,6 +30,7 @@
 
 struct sw_topic {
 	const char *topic;
+	bool on;
 	struct sw_topic *next;
 };
 
@@ -46,7 +47,9 @@ const struct sw_topic *sw_listen(const char *topic)
 			return *anchor;
 	*anchor = alloc_type(struct sw_topic);
 	(*anchor)->topic = stralloc(topic);
+	(*anchor)->on = 1;
 	(*anchor)->next = NULL;
+	broker_subscribe(topic);
 	return *anchor;
 }
 
@@ -82,7 +85,22 @@ struct sw_miner {
 };
 
 
-void sw_miner_add(struct miner *m, const char *topic, uint32_t mask)
+static void sw_set_miner(struct miner *m, uint32_t mask, bool on)
+{
+	uint32_t old_value = m->sw_value;
+	uint32_t old_mask = m->sw_mask;
+
+	if (on)
+		m->sw_value |= mask;
+	else
+		m->sw_value &= ~mask;
+	m->sw_mask |= mask;
+	if (m->sw_value != old_value || m->sw_mask != old_mask)
+		miner_send_sw(m);
+}
+
+
+static void sw_miner_add(struct miner *m, const char *topic, uint32_t mask)
 {
 	struct sw_miner *sw = alloc_type(struct sw_miner);
 
@@ -90,7 +108,7 @@ void sw_miner_add(struct miner *m, const char *topic, uint32_t mask)
 	sw->mask = mask;
 	sw->next = m->sw;
 	m->sw = sw;
-	broker_subscribe(topic);
+	sw_set_miner(m, mask, sw->topic->on);
 }
 
 
@@ -147,10 +165,6 @@ bool sw_miner_setup(struct miner *m, const struct var *vars)
 				return 0;
 			sw_miner_add(m, var->name + 7, mask);
 		}
-	if (!opt_uint32_var(vars, "switch_set", &m->sw_value, 0))
-		return 0;
-	if (!opt_uint32_var(vars, "switch_use", &m->sw_mask, m->sw_value))
-		return 0;
 	if (!opt_uint32_var(vars, "switch_refresh", &tmp, DEFAULT_SW_REFRESH_S))
 		return 0;
 	m->sw_refresh_s = tmp;
@@ -161,24 +175,9 @@ bool sw_miner_setup(struct miner *m, const struct var *vars)
 /* ----- Process switch message -------------------------------------------- */
 
 
-static void sw_set_miner(struct miner *m, uint32_t mask, bool on)
-{
-	uint32_t old_value = m->sw_value;
-	uint32_t old_mask = m->sw_mask;
-
-	if (on)
-		m->sw_value |= mask;
-	else
-		m->sw_value &= ~mask;
-	m->sw_mask |= mask;
-	if (m->sw_value != old_value || m->sw_mask != old_mask)
-		miner_send_sw(m);
-}
-
-
 void sw_set(const char *topic, bool on)
 {
-	const struct sw_topic *t;
+	struct sw_topic *t;
 	struct miner *m;
 	const struct sw_miner *sw;
 
@@ -189,6 +188,7 @@ void sw_set(const char *topic, bool on)
 	if (!t)
 		return;
 
+	t->on = on;
 	for (m = miners; m; m = m->next) {
 		for (sw = m->sw; sw; sw = sw->next)
 			if (sw->topic == t)

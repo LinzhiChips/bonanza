@@ -25,7 +25,6 @@ const struct sw_topic *sw_listen(const char *topic);
 void sw_subscribe(void);
 void sw_cleanup(void);
 
-void sw_miner_add(struct miner *m, const char *topic, uint32_t mask);
 void sw_miner_reset(struct miner *m);
 bool sw_miner_setup(struct miner *m, const struct var *vars);
 

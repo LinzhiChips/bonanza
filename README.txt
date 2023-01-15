@@ -276,6 +276,12 @@ serial1	the serial number of the board in the second slot
 
 These variables can be changed in the script.
 
+The following script variables control special functions after the script has
+ended:
+
+switch		(associative array) see section "Operations switch"
+switch_refresh	see section "Operations switch"
+
 
 Variable assignments
 --------------------
@@ -427,6 +433,42 @@ Examples:	DEST["pool1"] = "etc.stratum0://..."	# DEST_pool1
 To empty an associative array. use
 
 DEST = {}
+
+
+Operations switch
+=================
+
+Bonanza implements the functionality formerly found in the operations switch
+daemon (opsd), see
+https://github.com/LinzhiChips/doc/blob/master/guide-on-off-ops.txt
+
+Since bonanza discovers miners by listening to crew messages, it does not need
+to be given a list of miners, like opsd did.
+
+The following script variables control the operations switch of a miner:
+
+switch		This associative array is indexed with topic names, and the
+		value of each entry is the bit mask of the channels this topic
+		controls.
+
+switch_refresh	The ops switch refresh time in seconds. This is the equivalent
+		of the option -r/--refresh of opsd. The default is 600 seconds.
+
+The following examples illustrate how to configure the ops switch in bonanza:
+
+1) Configure MQTT topic /foo to control channel 2 (bit mask 4).
+   This is equivalent to the former  opsd.py /foo@4 miner
+
+name == "miner":
+	switch["/foo"] = 4
+
+2) Likewise, but with the switch initially set to "off"
+   (opsd.py /foo@-4 miner):
+
+The bonanza configuration is the same as with /foo@4. The "off" default has to
+be set via MQTT:
+
+mosquitto_pub -h ... -t /foo -m 0 -q 1 -r
 
 
 Example
