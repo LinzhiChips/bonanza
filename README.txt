@@ -80,9 +80,6 @@ http://machine.running.bonanza:8003
 Known bugs
 ----------
 
-- The vertical structure of the Web UI is not as intended. E.g., if the right
-  side needs a horizontal scrollbar, you need to scroll down to reach it.
-
 - The interaction of miner selection (left) and the variables (right) can be
   confusing in Test mode.
 

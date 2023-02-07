@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Linzhi Ltd.
+ * Copyright (C) 2022-2023 Linzhi Ltd.
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file COPYING.txt
@@ -936,6 +936,22 @@ function select_mode(name)
 /* ----- initialization ---------------------------------------------------- */
 
 
+function compute_sizes()
+{
+	var content = document.getElementById("content");
+
+	// https://stackoverflow.com/a/294273/8179289
+	// https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+	// https://stackoverflow.com/a/14275343/8179289
+	var h = document.body.getBoundingClientRect().height -
+	    content.getBoundingClientRect().top +
+	    parseInt(window.getComputedStyle(document.body).marginTop);
+
+	// https://stackoverflow.com/a/10118190/8179289
+	content.setAttribute("style", "height:" + h.toString() + "px");
+}
+
+
 {
 	for (let name of [ "active", "test" ]) {
 		var td = document.getElementById("menu-" + name);
@@ -943,6 +959,11 @@ function select_mode(name)
 		td.addEventListener("click", function() { select_mode(name); });
 		activate_mode(name, 0);
 	}
+
+	compute_sizes();
+
+	window.addEventListener("resize",
+	    function(event){ compute_sizes(); });
 
 	activate_mode("active", 1);
 
